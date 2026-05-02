@@ -1,0 +1,63 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "enterprise-order-platform"
+        IMAGE_TAG = "latest"
+        CONTAINER_NAME = "order-platform"
+    }
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                cleanWs()
+                git branch: 'main',
+                    url: 'https://github.com/fred2030/enterprise-order-processing-platform.git'
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                sh '''
+                cd app
+                mvn clean package -DskipTests
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                docker build -t $IMAGE_NAME:$IMAGE_TAG -f docker/Dockerfile .
+                '''
+            }
+        }
+
+        stage('Stop Old Container') {
+            steps {
+                sh '''
+                docker stop $CONTAINER_NAME || true
+                docker rm $CONTAINER_NAME || true
+                '''
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                sh '''
+                docker run -d -p 8080:8080 --name $CONTAINER_NAME $IMAGE_NAME:$IMAGE_TAG
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Deployment successful"
+        }
+        failure {
+            echo "Pipeline failed"
+        }
+    }
+}

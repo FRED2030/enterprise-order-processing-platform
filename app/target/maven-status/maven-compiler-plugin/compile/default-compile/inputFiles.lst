@@ -1,0 +1,4 @@
+/home/ubuntu/enterprise-order-processing-platform/app/src/main/java/com/enterprise/orderplatform/OrderPlatformApplication.java
+/home/ubuntu/enterprise-order-processing-platform/app/src/main/java/com/enterprise/orderplatform/domain/Order.java
+/home/ubuntu/enterprise-order-processing-platform/app/src/main/java/com/enterprise/orderplatform/controller/OrderController.java
+/home/ubuntu/enterprise-order-processing-platform/app/src/main/java/com/enterprise/orderplatform/service/OrderService.java
