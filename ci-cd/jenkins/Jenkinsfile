@@ -9,6 +9,18 @@ pipeline {
 
     stages {
 
+        stage('Debug Workspace') {
+            steps {
+                sh '''
+                echo "===== ROOT ====="
+                ls -la
+
+                echo "===== APP ====="
+                ls -la app
+                '''
+            }
+        }
+
         stage('Build Application') {
             steps {
                 sh '''
@@ -16,7 +28,7 @@ pipeline {
                 -v $WORKSPACE:/workspace \
                 -v $HOME/.m2:/root/.m2 \
                 maven:3.9-eclipse-temurin-17 \
-                mvn -f /workspace/app/pom.xml clean package -DskipTests
+                sh -c "cd /workspace/app && mvn clean package -DskipTests"
                 '''
             }
         }
