@@ -20,15 +20,17 @@ pipeline {
         stage('Build Application') {
             steps {
                 sh '''
-         docker run --rm \
-        -v $WORKSPACE/app:/app \
-        -v $HOME/.m2:/root/.m2 \
-        -w /app \
-        maven:3.9-eclipse-temurin-17 \
-        mvn clean package -DskipTests
-        '''
-    }
-}        stage('Build Docker Image') {
+                docker run --rm \
+                -v $WORKSPACE/app:/app \
+                -v $HOME/.m2:/root/.m2 \
+                -w /app \
+                maven:3.9-eclipse-temurin-17 \
+                mvn clean package -DskipTests
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
             steps {
                 sh '''
                 docker build -t $IMAGE_NAME:$IMAGE_TAG -f docker/Dockerfile .
@@ -48,7 +50,7 @@ pipeline {
         stage('Run Container') {
             steps {
                 sh '''
-                docker run -d -p 8080:8081 --name $CONTAINER_NAME $IMAGE_NAME:$IMAGE_TAG
+                docker run -d -p 8080:8080 --name $CONTAINER_NAME $IMAGE_NAME:$IMAGE_TAG
                 '''
             }
         }
@@ -56,10 +58,10 @@ pipeline {
 
     post {
         success {
-            echo "Deployment successful"
+            echo "Pipeline SUCCESS"
         }
         failure {
-            echo "Pipeline failed"
+            echo "Pipeline FAILED"
         }
     }
 }
