@@ -9,14 +9,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
-            steps {
-                cleanWs()
-                git branch: 'main',
-                    url: 'https://github.com/fred2030/enterprise-order-processing-platform.git'
-            }
-        }
-
         stage('Build Application') {
             steps {
                 sh '''
@@ -50,7 +42,7 @@ pipeline {
         stage('Run Container') {
             steps {
                 sh '''
-                docker run -d -p 8080:8081 --name $CONTAINER_NAME $IMAGE_NAME:$IMAGE_TAG
+                docker run -d -p 8080:8080 --name $CONTAINER_NAME $IMAGE_NAME:$IMAGE_TAG
                 '''
             }
         }
