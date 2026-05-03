@@ -23,8 +23,8 @@ pipeline {
                     ls -la $WORKSPACE/app
 
                     docker run --rm \
-                      -v $WORKSPACE:/home/app \
-                      -w /home/app/app \
+                      -v $WORKSPACE:/workspace \
+                      -w /workspace/app \
                       maven:3.9-eclipse-temurin-17 \
                       mvn clean package -DskipTests
                 '''
@@ -58,7 +58,7 @@ pipeline {
     }
 
     post {
-        success { echo "✅ Deployment successful" }
-        failure { echo "❌ Pipeline failed" }
+        success { echo "✅ SUCCESS" }
+        failure { echo "❌ FAILED" }
     }
 }
