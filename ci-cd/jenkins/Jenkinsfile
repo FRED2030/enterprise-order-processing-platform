@@ -19,17 +19,27 @@ pipeline {
         stage('Build Application') {
             steps {
                 sh '''
-        ls -la
-        ls -la app
+                ls -la
+                ls -la app
 
-        docker run --rm \
-          -v $PWD:/workspace \
-          -w /workspace/app \
-          maven:3.9-eclipse-temurin-17 \
-          mvn clean package -DskipTests
-        '''
-    }
-}        stage('Stop Old Container') {
+                docker run --rm \
+                  -v $PWD:/workspace \
+                  -w /workspace/app \
+                  maven:3.9-eclipse-temurin-17 \
+                  mvn clean package -DskipTests
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                docker build -t $IMAGE_NAME:$IMAGE_TAG -f docker/Dockerfile .
+                '''
+            }
+        }
+
+        stage('Stop Old Container') {
             steps {
                 sh '''
                 docker stop $CONTAINER_NAME || true
