@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME     = "enterprise-order-platform"
-        IMAGE_TAG      = "latest"
+        IMAGE_NAME = "enterprise-order-platform"
+        IMAGE_TAG = "latest"
         CONTAINER_NAME = "order-platform"
     }
 
@@ -11,6 +11,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
+                cleanWs()
                 git branch: 'main',
                     url: 'https://github.com/fred2030/enterprise-order-processing-platform.git'
             }
@@ -19,14 +20,8 @@ pipeline {
         stage('Build Application') {
             steps {
                 sh '''
-                    echo "Workspace: $WORKSPACE"
-                    ls -la $WORKSPACE/app
-
-                    docker run --rm \
-                      -v $WORKSPACE:/workspace \
-                      -w /workspace/app \
-                      maven:3.9-eclipse-temurin-17 \
-                      mvn clean package -DskipTests
+                cd app
+                mvn clean package -DskipTests
                 '''
             }
         }
@@ -34,7 +29,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f docker/Dockerfile .
+                docker build -t $IMAGE_NAME:$IMAGE_TAG -f docker/Dockerfile .
                 '''
             }
         }
@@ -42,8 +37,8 @@ pipeline {
         stage('Stop Old Container') {
             steps {
                 sh '''
-                    docker stop ${CONTAINER_NAME} || true
-                    docker rm ${CONTAINER_NAME} || true
+                docker stop $CONTAINER_NAME || true
+                docker rm $CONTAINER_NAME || true
                 '''
             }
         }
@@ -51,14 +46,18 @@ pipeline {
         stage('Run Container') {
             steps {
                 sh '''
-                    docker run -d -p 8080:8080 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}
+                docker run -d -p 8080:8081 --name $CONTAINER_NAME $IMAGE_NAME:$IMAGE_TAG
                 '''
             }
         }
     }
 
     post {
-        success { echo "✅ SUCCESS" }
-        failure { echo "❌ FAILED" }
+        success {
+            echo "Deployment successful"
+        }
+        failure {
+            echo "Pipeline failed"
+        }
     }
 }
