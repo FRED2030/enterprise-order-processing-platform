@@ -10,11 +10,28 @@ pipeline {
     stages {
 
         stage('Checkout Code') {
-             steps {
-        git branch: 'main',
-            url: 'https://github.com/fred2030/enterprise-order-processing-platform.git'
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/fred2030/enterprise-order-processing-platform.git'
+            }
         }
-     }                docker build -t $IMAGE_NAME:$IMAGE_T 	        AG -f docker/Dockerfile .
+
+        stage('Build Application') {
+            steps {
+                sh '''
+                docker run --rm \
+                  -v $(pwd):/workspace \
+                  -w /workspace/app \
+                  maven:3.9-eclipse-temurin-17 \
+                  mvn clean package -DskipTests
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                docker build -t $IMAGE_NAME:$IMAGE_TAG -f docker/Dockerfile .
                 '''
             }
         }
