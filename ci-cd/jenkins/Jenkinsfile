@@ -13,10 +13,14 @@ pipeline {
             steps {
                 sh '''
                 docker run --rm \
-                -v $WORKSPACE:/workspace \
-                -w /workspace/app \
+                -v $WORKSPACE:/tmp/workspace \
                 maven:3.9-eclipse-temurin-17 \
+                sh -c "
+                cp -r /tmp/workspace /workspace && \
+                cd /workspace/app && \
+                ls -la && \
                 mvn clean package -DskipTests
+                "
                 '''
             }
         }
