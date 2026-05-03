@@ -1,12 +1,10 @@
 pipeline {
     agent any
-
     environment {
-        IMAGE_NAME = "enterprise-order-platform"
-        IMAGE_TAG = "latest"
-        CONTAINER_NAME = "order-platform"
+        IMAGE_NAME      = "enterprise-order-platform"
+        IMAGE_TAG       = "latest"
+        CONTAINER_NAME  = "order-platform"
     }
-
     stages {
 
         stage('Checkout Code') {
@@ -19,50 +17,42 @@ pipeline {
         stage('Build Application') {
             steps {
                 sh '''
-                ls -la
-                ls -la app
-
-                docker run --rm \
-                  -v $PWD:/workspace \
-                  -w /workspace/app \
-                  maven:3.9-eclipse-temurin-17 \
-                  mvn clean package -DskipTests
+                    echo "✅ Workspace: ${WORKSPACE}"
+                    ls -la
+                    ls -la app/
+                    docker run --rm \
+                      -v "${WORKSPACE}":/workspace \
+                      -w /workspace/app \
+                      maven:3.9-eclipse-temurin-17 \
+                      mvn clean package -DskipTests
                 '''
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh '''
-                docker build -t $IMAGE_NAME:$IMAGE_TAG -f docker/Dockerfile .
-                '''
+                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -f docker/Dockerfile .'
             }
         }
 
         stage('Stop Old Container') {
             steps {
                 sh '''
-                docker stop $CONTAINER_NAME || true
-                docker rm $CONTAINER_NAME || true
+                    docker stop ${CONTAINER_NAME} || true
+                    docker rm   ${CONTAINER_NAME} || true
                 '''
             }
         }
 
         stage('Run Container') {
             steps {
-                sh '''
-                docker run -d -p 8080:8080 --name $CONTAINER_NAME $IMAGE_NAME:$IMAGE_TAG
-                '''
+                sh 'docker run -d -p 8080:8080 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${IMAGE_TAG}'
             }
         }
-    }
 
+    }
     post {
-        success {
-            echo "Deployment successful"
-        }
-        failure {
-            echo "Pipeline failed"
-        }
+        success { echo "✅ Deployment successful" }
+        failure { echo "❌ Pipeline failed" }
     }
 }
