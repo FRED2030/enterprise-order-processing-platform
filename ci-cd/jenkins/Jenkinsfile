@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3.9-eclipse-temurin-17'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     environment {
         IMAGE_NAME = "enterprise-order-platform"
@@ -9,26 +14,11 @@ pipeline {
 
     stages {
 
-        stage('Debug Workspace') {
-            steps {
-                sh '''
-                echo "===== ROOT ====="
-                ls -la
-
-                echo "===== APP ====="
-                ls -la app
-                '''
-            }
-        }
-
         stage('Build Application') {
             steps {
                 sh '''
-                docker run --rm \
-                -v $WORKSPACE:/workspace \
-                -v $HOME/.m2:/root/.m2 \
-                maven:3.9-eclipse-temurin-17 \
-                sh -c "cd /workspace/app && mvn clean package -DskipTests"
+                cd app
+                mvn clean package -DskipTests
                 '''
             }
         }
