@@ -15,9 +15,8 @@ pipeline {
                 docker run --rm \
                 -v $WORKSPACE:/workspace \
                 -v $HOME/.m2:/root/.m2 \
-                -w /workspace/app \
                 maven:3.9-eclipse-temurin-17 \
-                mvn clean package -DskipTests
+                mvn -f /workspace/app/pom.xml clean package -DskipTests
                 '''
             }
         }
